@@ -1,2 +1,2 @@
 08/15/2015 Yun: According to MVC model, create three folders: public, templates, includes. Pulbic folder includes the initial default web page (index.php) and other php file controlling programming logic, such as login.php to let users submit login information. Templates folder includes web page templates, such as header, footer, or register form, login in form, etc. Includes folder have configuration setting, constant setting, and functions.
-08/16/2015 Yun:
+08/16/2015 Yun: Created index, signup, login, logout and groups pages.
