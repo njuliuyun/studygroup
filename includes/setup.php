@@ -9,8 +9,8 @@ require_once('functions.php');
 
 createTable('members', 
             'user VARCHAR(16), 
-            pass VARCHAR(32),
-            INDEX(user(6))');
+             pass VARCHAR(32),
+             INDEX(user(6))');
 
 createTable('messages', 
             'id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -28,16 +28,24 @@ createTable('friends',
              INDEX(user(6)),
              INDEX(friend(6))');
              
-createTable('profile',
+createTable('profiles',
             'user VARCHAR(16),
              text VARCHAR(4096),
              INDEX(user(6))');
              
-createTable('interest',
+createTable('groups',
             'user VARCHAR(16),
-             inter VARCHAR(16),
+             course VARCHAR(16),
              INDEX(user(6)),
-             INDEX(inter(6))');
+             INDEX(course(6))');
+             
+createTable('courses',
+            'course VARCHAR(16),
+             coursename VARCHAR(64),
+             instructor VARCHAR(16),
+             INDEX(instructor(6)),
+             INDEX(course(6)),
+             INDEX(coursename(32))');
 ?>
         <br>...done.
     </body>
