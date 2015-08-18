@@ -40,12 +40,20 @@ createTable('groups',
              INDEX(course(6))');
              
 createTable('courses',
-            'course VARCHAR(16),
+            'course VARCHAR(16) PRIMARY KEY,
              coursename VARCHAR(64),
              instructor VARCHAR(16),
              INDEX(instructor(6)),
-             INDEX(course(6)),
              INDEX(coursename(32))');
+             
+createTable('discussions',
+            'id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+             course VARCHAR(16),
+             user VARCHAR(16),
+             time INT UNSIGNED,
+             message VARCHAR(4096),
+             INDEX(user(6)),
+             INDEX(course(6))');
 ?>
         <br>...done.
     </body>
