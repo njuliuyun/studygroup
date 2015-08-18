@@ -1,8 +1,8 @@
 <?php
-$pagetitle = "| Register"; 
+$pagetitle = "| Register";
+$current = 'signup'; 
 require_once('../templates/header.php');
 
-echo "<div class='main'>";
 
 // check submitted information
 
@@ -27,7 +27,7 @@ if (isset($_POST['user'])) {
         } */
         $result = queryMysql("SELECT * FROM members WHERE user='$user'");
         if ($result->num_rows) {
-            $error = "That username already exists<br><br>";
+            $error = "That username already exists";
         }
         else {
             $passS = secure($pass);
@@ -40,21 +40,18 @@ if (isset($_POST['user'])) {
 
 // sign up form
 echo <<<_END
-        <h2>Sign Up</h2>
-        <form method="post" action="signup.php">$error<br>
+        
+        <form method="post" action="signup.php"><span class="error">$error</span><br>
             <label class="fieldname">Username</label>
-            <input type="text" maxlength="16" name="user" value='$user' onBlur="checkUser(this)">
-            <span id="info"></span><br>
+            <input class="withinfo" type="text" maxlength="16" name="user" value='$user' onBlur="checkUser(this)">
+            <span id="info">&nbsp;</span><br>
             <label class="fieldname">Password</label>
             <input type="password" maxlength="16" name="pass" value="$pass" id="pass1"><br>
             <label class="fieldname">Conform Password</label>
-            <input type="password" maxlength="16" name="passc" value="$pass2" onkeyup="conformPass(this)"><span id="pass_info"></span><br>
-            <input type="submit" value="Sign up">
+            <input class="withinfo" type="password" maxlength="16" name="passc" value="$pass2" onkeyup="conformPass(this)"><span id="pass_info">&nbsp;</span><br>
+            <input class="submit" type="submit" value="Sign up">
         </form>
+        <p> Already have an acount? Please <a href='login.php'>log in</a>.</p>
 _END;
-?>    
-        
-        
-        </div>
-    </body>
-</html>
+
+include_once('../templates/footer.php');
