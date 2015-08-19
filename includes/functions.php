@@ -50,15 +50,17 @@ function secure($pass) {
 
 /* display someone's profile */
 function showProfile($user) {
-    if (file_exists("$user.jpg")) {
-        echo "<img src='$user.jpg' style='float:left;'>";
-    }
+    if (file_exists("img/$user.jpg")) {
+        $imgSrc = "img/$user.jpg";
+    } else $imgSrc = "img/default.jpg";
+    echo "<div class='profile clearfix'><div class='img-contain'><img src='$imgSrc' style='float:left;'></div>";
     $result = queryMysql("SELECT * FROM profiles WHERE user='$user'");
     
     if ($result->num_rows) {
         $row = $result->fetch_array(MYSQLI_ASSOC);
-        echo stripslashes($row['text']) . "<br style='clear:both;'><br>";
-    }    
+        echo stripslashes($row['text']);
+    }
+    echo "</div>";
 }
 
 /* display someone's groups */
@@ -69,7 +71,7 @@ function showGroups($user) {
         echo "<ul>";
         for ($i = 0; $i < $num; $i++) {
             $row = $result->fetch_array(MYSQLI_ASSOC);
-            echo "<li><a href='group.php?view=" . $row['course'] . "'>" . $row['course'] . "(" . $row['coursename'] . ")" .
+            echo "<li><a href='group.php?view=" . $row['course'] . "'>" . $row['course'] . " " . $row['coursename'].
             "</a></li>";
         }
         echo "</ul>";
@@ -84,4 +86,11 @@ function addGroup($user, $add) {
 }
 function removeGroup($user, $remove) {
     queryMysql("DELETE FROM groups WHERE user='$user' AND course='$remove'");
+}
+
+/* display small avatar */
+function showImage($user) {
+    if (file_exists("img/$user.jpg")) $src = "img/$user.jpg";
+    else $src = "img/default.jpg";
+    return "<div class='img-contain'><img class='small-img' src='$src'></div>";
 }
