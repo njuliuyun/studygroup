@@ -7,13 +7,30 @@ if(!$loggedin) die("<script>window.location = 'index.php';</script>");
 // view profile
 if (isset($_GET['view'])) {
     $view = sanitizeString($_GET['view']);
-    if ( strtolower($view) ==  strtolower($user)) $name = "Your";
+    if ( strtolower($view) ==  strtolower($user)) $name = "My";
     else $name = "$view's";
     echo "<h2 class='title'>$name Profile</h2><div class='display'>";
     showProfile($view);
-    echo "<a class='button' href='groups.php?view=$view'>View $name groups</a>" .
-         "<a class='button' href='friends.php?view=$view'>View $name friends</a>" .
-         "<a class='button' href='messages.php?view=$view'>View $name messages</a></div>";
+    echo "<a class='button' href='groups.php?view=$view'> $name groups</a>" .
+         "<a class='button' href='friends.php?view=$view'> $name friends</a>" .
+         "<a class='button' href='messages.php?view=$view'> $name messages</a>";
+    if (strtolower($view) !=  strtolower($user)) {
+        $result_friend = queryMysql("SELECT * FROM friends WHERE user='$user' AND friend='$view'");
+        if ($result_friend->num_rows) {
+            echo <<<_END
+            <span id='friend'><div class='button' onclick="removeFriend('$user', '$view')">Unfollow $view</div></span>
+_END;
+            
+        }
+        else  {
+            echo <<<_END
+            <span id='friend' ><div class='button' onclick="addFriend('$user', '$view')">Follow $view</div></span>
+_END;
+            
+        }
+        
+    }
+    echo "</div>";    
     include_once('../templates/footer.php');
     die();
 }
@@ -35,24 +52,25 @@ echo "<h3 class='title'>Other members</h3><div class='display'><ul>";
 for ($i = 0; $i < $num; $i++) {
     $row = $result->fetch_array(MYSQLI_ASSOC);
     if ( strtolower($row['user']) ==  strtolower($user)) continue;
-    echo "<li><a href='members.php?view=" . $row['user'] . "'>" . $row['user'] . "</a>";
+    echo "<li class='clearfix'><a href='members.php?view=" . $row['user'] . "'>" . showImage($row['user']) . $row['user'] . "</a>";
+    
     // check friend status
     $follow = "follow";
     $result1 = queryMysql("SELECT * FROM friends WHERE user='$user' AND friend='" . $row['user'] . "'");
     $t1 = $result1->num_rows;
     $result1 = queryMysql("SELECT * FROM friends WHERE user='" . $row['user'] . "' AND friend='$user'");
     $t2 = $result1->num_rows;
-    if ($t1 + $t2 > 1) echo "&harr; is a mutual friend.";
-    elseif ($t1) echo "&larr; you are following";
+    if ($t1 + $t2 > 1) echo "<span class='state'>&harr; is a mutual friend.</span>";
+    elseif ($t1) echo "<span class='state'>&larr; you are following</span>";
     elseif ($t2) {
-        echo "&rarr; is following you";
+        echo "<span class='state'>&rarr; is following you</span>";
         $follow = 'recip'; 
     }
 
     if (!$t1) {
-        echo "<span class='action'>[<a href='members.php?add=" . $row['user'] . "'>$follow</a>]</span>";
+        echo "<span class='action'><a class='button small' href='members.php?add=" . $row['user'] . "'>$follow</a></span>";
     }
-    else echo "<span class='action'>[<a href='members.php?remove=" . $row['user'] . "'>drop</a>]</span>";
+    else echo "<span class='action'><a class='button small' href='members.php?remove=" . $row['user'] . "'>drop</a></span>";
     echo "</li>";
 }
 echo "</ul></div>";

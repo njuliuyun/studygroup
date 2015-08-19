@@ -46,12 +46,12 @@ for ($i = 0; $i < $num; $i++) {
     echo "<li><a href='group.php?view=" . $row['course'] . "'>" . $row['course'] . " " . $row['coursename'] . "</a>";    
     // check if the user is in a group
     $result1 = queryMysql("SELECT * FROM groups WHERE user='$user' AND course='" . $row['course'] . "'");
-    if ($result1->num_rows) {
-        echo "<span class='action'> You are in this group";
-        echo "[<a href='groups.php?remove=" . $row['course'] . "'>drop</a>]</span>";
+    if ($result1->num_rows) {        
+        echo "<span class='action'><a class='button small' href='groups.php?remove=" . $row['course'] . "'>drop</a>";
+        echo "<span class='state'>You are in this group</span></span>";
     }
-    else echo "<span class='action'>[<a href='groups.php?add=" . $row['course'] . "'>join</a>]<span class='action'>";    
+    else echo "<span class='action'><a class='button small' href='groups.php?add=" . $row['course'] . "'>join</a><span class='action'>";    
     echo "</li>";
 }
-echo "</ul><div>didn't find your course? click <a href='createGroup.php'>here</a> to create a new group.</div></div>";
+echo "</ul><div>Don't see your course? Click <a href='createGroup.php'>here</a> to create a new group.</div></div>";
 include_once('../templates/footer.php');

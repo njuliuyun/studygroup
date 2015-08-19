@@ -68,22 +68,53 @@ if (isset($_GET['view'])) {
             queryMysql("DELETE FROM discussions WHERE id=$erase AND user='$user'");
         }
         
+        // show 10 discussions per page
+        $page = 1;
+        $num_per_page = 10;
+        $pages = 1;
+        if (isset($_GET['page'])) {
+            $page = sanitizeString($_GET['page']);            
+        }
+        $offset = ($page-1)*$num_per_page;
+        
+        /* display discussions */
         echo "<div class='display'><h2 class='title'>Course Discussions</h2>";
-        $result_dis = queryMysql("SELECT * FROM discussions WHERE course='$view' ORDER BY time DESC");
-        $num_dis = $result_dis->num_rows;
-        if ($num_dis) {
-            for ($i = 0; $i < $num_dis; $i++) {
-                $row_dis = $result_dis->fetch_array(MYSQLI_ASSOC);
-                echo "<div class='discuss'><a href='members.php?view=" . $row_dis['user'] . "'>" . $row_dis['user'] . "</a>: " . 
-                "<span>" . $row_dis['message'] . "</span>";                
-                if (strtolower($row_dis['user']) == strtolower($user)) {
-                    echo "<span class='action'>[<a href='group.php?view=$view&erase=" . $row_dis['id'] . "'>erase</a>]</span>";
+        
+        // determine the total pages
+        $result_page = queryMysql("SELECT * FROM discussions WHERE course='$view'");
+        $pages = ceil($result_page->num_rows / $num_per_page);
+        echo "<p class='page'>page ";
+        for ($i = 1; $i <= $pages; $i++) {            
+            echo "[<a href='group.php?view=$view&page=$i'>$i</a>] ";
+        }
+        echo "</p>";
+        
+        if ($pages) {
+            $result_dis = queryMysql("SELECT * FROM discussions WHERE course='$view' ORDER BY time DESC LIMIT $num_per_page OFFSET $offset");
+            $num_dis = $result_dis->num_rows;
+            
+            if ($num_dis) {                
+                $end = min($num_dis, $num_per_page);
+                
+                for ($i = 0; $i < $end; $i++) {
+                    $row_dis = $result_dis->fetch_array(MYSQLI_ASSOC);
+                    echo "<div class='discuss clearfix'><a href='members.php?view=" . $row_dis['user'] . "'>".showImage($row_dis['user']). 
+                         "<div class='discuss-text'>"  . $row_dis['user'] . "</a>: " . 
+                         "<span>" . $row_dis['message'] . "</span>";                
+                    if (strtolower($row_dis['user']) == strtolower($user)) {
+                        echo "<span class='action'>[<a href='group.php?view=$view&page=$page&erase=" . $row_dis['id'] . "'>erase</a>]</span>";
+                    }
+                    echo "<p class='date'>" . date('  M jS \'y g:ia', $row_dis['time']) . "</p>";
+                    echo "</div></div>";
                 }
-                echo "<p class='date'>" . date('  M jS \'y g:ia', $row_dis['time']) . "</p>";
-                echo "</div>";
-            }
-        } else echo "<p>No discussions yet.</p>";
-        echo "</div>";
+            } else echo "<p>Page $page not found.</p>";
+        }        
+        else echo "<p>No discussions yet.</p>";
+        echo "<p class='page'>page ";
+        for ($i = 1; $i <= $pages; $i++) {            
+            echo "[<a href='group.php?view=$view&page=$i'>$i</a>] ";
+        }
+        echo "</p></div>";
         
         // discussion submit form
         // only group members can post a discussion
@@ -98,7 +129,7 @@ if (isset($_GET['view'])) {
             <input class="submit" type="submit" value="Post Discussion"></form>
 _END;
         }
-        else echo " Join this group to discuss with other members.";
+        else echo " <a href='group.php?view=$view&&add=$view'><b>Join</b></a> this group to discuss with other members.";
         echo "</div>";
     }
     else echo "<div class='display'><h2 class='title'>Course Information</h2><p>Course not found.</p></div>"; 
@@ -107,8 +138,6 @@ else {
     echo "<div class='display'><h2 class='title'>Course Information</h2><p>No group selected.</p></div>";   
 }
 echo "</div>";
-
-// show discussion
 
 
 include_once('../templates/footer.php');

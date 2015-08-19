@@ -25,7 +25,7 @@ if ($view != '') {
         $name2 = "$view's";
     }
 }
-echo "<h2 class='title'>$name2 Messages</h2><div class='display'>";
+echo "<h3 class='title'>$name2 Messages</h3><div class='display'>";
 showProfile($view);
 
 // erase a message
