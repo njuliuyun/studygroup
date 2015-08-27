@@ -33,30 +33,61 @@ if (isset($_GET['erase'])) {
     $erase = sanitizeString($_GET['erase']);
     queryMysql("DELETE FROM messages WHERE id=$erase AND recip='$user'");
 }
-// display messages
-$query = "SELECT * FROM messages WHERE recip='$view' ORDER BY time DESC";
+/* display messages */
+echo "<div class='content'>";
+
+// pagination
+$page = 1;
+$num_per_page = 10;
+$pages = 1;
+
+// determine the total pages
+$result_page = queryMysql("SELECT * FROM messages WHERE recip='$view'");
+$pages = ceil($result_page->num_rows / $num_per_page);
+
+echo "</p>";
+
+if (isset($_GET['page'])) {
+    $page = sanitizeString($_GET['page']);            
+}
+$offset = ($page-1)*$num_per_page;
+
+$query = "SELECT * FROM messages WHERE recip='$view' ORDER BY time DESC LIMIT $num_per_page OFFSET $offset";
 $result = queryMysql($query);
 $num = $result->num_rows;
-echo "<div class='content'>";
-for ($i = 0; $i < $num; $i++) {
-    $row = $result->fetch_array(MYSQLI_ASSOC);
-    if ($row['pm'] == 0 || strtolower($row['auth']) == strtolower($user) || strtolower($row['recip']) == strtolower($user)) {
-        echo date('M jS \'y g:ia: ', $row['time']);
-        echo "<a href='members.php?view=" . $row['auth'] . "'>" . $row['auth'] . "</a> ";
-        if ($row['pm'] == 0) {
-            echo "wrote: &quot;" . $row['message'] . "&quot;";
+$end = min($num, $num_per_page);
+if ($num) {
+    echo "<p class='page'>page ";
+    $href = "messages.php?view=$view";
+    showPage($page, $pages, $href);
+    for ($i = 0; $i < $end; $i++) {
+        $row = $result->fetch_array(MYSQLI_ASSOC);
+        if ($row['pm'] == 0 || strtolower($row['auth']) == strtolower($user) || strtolower($row['recip']) == strtolower($user)) {
+            
+            echo "<div class='message clearfix'><a href='members.php?view=" . $row['auth'] . "'>" . showImage($row['auth']) . 
+            "<div class='message-text'>" . $row['auth'] . "</a>";
+            // public messages
+            if ($row['pm'] == 0) {
+                echo " wrote: &quot;" . $row['message'] . "&quot;";
+            }
+            // private messages
+            else echo " whispered: <span class='whisper'><i>&quot;" . $row['message'] . "&quot;</i></span>";
+            
+            if (strtolower($row['recip']) == strtolower($user)) {
+                echo "<span class='action'>[<a href='messages.php?erase=" . $row['id'] . "'>erase</a>]</span>";
+            }
+            echo "<p class='date'>" . date('  M jS \'y g:ia', $row['time']) . "</p>";
+            echo "</div></div>";
         }
-        else echo "whispered: <span class='whisper'>&quot;" . $row['message'] . "&quot;</span>";
-        
-        if (strtolower($row['recip']) == strtolower($user)) {
-            echo "<span class='action'>[<a href='messages.php?erase=" . $row['id'] . "'>erase</a>]</span>";
-        }
-        echo "<br>";
     }
+    echo "<p class='page'>page ";        
+    showPage($page, $pages, $href);
+    echo "</p>";
 }
-if (!$num) echo "<br><span class='info'>No messages yet</span><br><br>";
-
+else echo "<br><span class='info'>No messages yet</span><br><br>";
 echo "</div><a class='button' href='messages.php?view=$view'>Refresh messages</a></div>";
+echo "</div>";
+
 // message form
 echo <<<_END
         <div class='display'>

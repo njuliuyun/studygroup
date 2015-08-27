@@ -68,7 +68,7 @@ if (isset($_GET['view'])) {
             queryMysql("DELETE FROM discussions WHERE id=$erase AND user='$user'");
         }
         
-        // show 10 discussions per page
+        // pagination
         $page = 1;
         $num_per_page = 10;
         $pages = 1;
@@ -83,13 +83,13 @@ if (isset($_GET['view'])) {
         // determine the total pages
         $result_page = queryMysql("SELECT * FROM discussions WHERE course='$view'");
         $pages = ceil($result_page->num_rows / $num_per_page);
-        echo "<p class='page'>page ";
-        for ($i = 1; $i <= $pages; $i++) {            
-            echo "[<a href='group.php?view=$view&page=$i'>$i</a>] ";
-        }
-        echo "</p>";
-        
+                
         if ($pages) {
+            echo "<p class='page'>page ";
+            $href = "group.php?view=$view";
+            showPage($page, $pages, $href);
+            echo "</p>";
+            
             $result_dis = queryMysql("SELECT * FROM discussions WHERE course='$view' ORDER BY time DESC LIMIT $num_per_page OFFSET $offset");
             $num_dis = $result_dis->num_rows;
             
@@ -98,8 +98,8 @@ if (isset($_GET['view'])) {
                 
                 for ($i = 0; $i < $end; $i++) {
                     $row_dis = $result_dis->fetch_array(MYSQLI_ASSOC);
-                    echo "<div class='discuss clearfix'><a href='members.php?view=" . $row_dis['user'] . "'>".showImage($row_dis['user']). 
-                         "<div class='discuss-text'>"  . $row_dis['user'] . "</a>: " . 
+                    echo "<div class='message clearfix'><a href='members.php?view=" . $row_dis['user'] . "'>".showImage($row_dis['user']). 
+                         "<div class='message-text'>"  . $row_dis['user'] . "</a>: " . 
                          "<span>" . $row_dis['message'] . "</span>";                
                     if (strtolower($row_dis['user']) == strtolower($user)) {
                         echo "<span class='action'>[<a href='group.php?view=$view&page=$page&erase=" . $row_dis['id'] . "'>erase</a>]</span>";
@@ -108,15 +108,13 @@ if (isset($_GET['view'])) {
                     echo "</div></div>";
                 }
             } else echo "<p>Page $page not found.</p>";
+            echo "<p class='page'>page ";        
+            showPage($page, $pages, $href);
+            echo "</p>";
         }        
         else echo "<p>No discussions yet.</p>";
-        echo "<p class='page'>page ";
-        for ($i = 1; $i <= $pages; $i++) {            
-            echo "[<a href='group.php?view=$view&page=$i'>$i</a>] ";
-        }
-        echo "</p></div>";
-        
-        // discussion submit form
+        echo "</div>";
+        /* discussion submit form */
         // only group members can post a discussion
         echo "<div class='display'>";
         $result_user = queryMysql("SELECT * FROM groups WHERE course='$view' AND user='$user'");
