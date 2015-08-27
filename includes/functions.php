@@ -58,7 +58,7 @@ function showProfile($user) {
     
     if ($result->num_rows) {
         $row = $result->fetch_array(MYSQLI_ASSOC);
-        echo stripslashes($row['text']);
+        echo "<div class='message-text'>"  . stripslashes($row['text']) . "</div>";
     }
     echo "</div>";
 }
@@ -93,4 +93,15 @@ function showImage($user) {
     if (file_exists("img/$user.jpg")) $src = "img/$user.jpg";
     else $src = "img/default.jpg";
     return "<div class='img-contain'><img class='small-img' src='$src'></div>";
+}
+
+/* show page numbers */
+function showPage($page, $pages, $href) {// current page number, totle pages, pagelink    
+    for ($i = 1; $i <= $pages; $i++) {
+        if ($i == $page) $class = "current-page";
+        else $class = "";
+        $href = $href . "&page=$i";
+        echo "<a class='button $class' href='$href'>$i</a> ";
+    }
+    
 }
